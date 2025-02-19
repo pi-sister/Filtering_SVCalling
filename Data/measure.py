@@ -21,7 +21,14 @@ def comp_within(mutant_df, control_df, dist:int=10) -> pd.DataFrame:
     pd.DataFrame: The mutant dataframe with matched rows removed.
     """
     indices_to_drop = []
-    
+    # chrom_col = '#CHROM'
+    # pos_col = 'POS'
+    # if "#CHROM" not in mutant_df.columns:
+    #     chrom_col = '@left_chr'
+    #     pos_col = 'left_pos'
+    print(f'Control columns: {control_df.columns}')
+    print(f'Mutant columns: {mutant_df.columns}')
+        
     # Cycle through each chromosome in the mutant dataframe
     for chrom in mutant_df['#CHROM'].unique():
         control_df_chrom = control_df[control_df['#CHROM'] == chrom]
@@ -196,9 +203,9 @@ def filter(files):
     filtered_files = []
     
     for file in files:
+        df = file.df
         # For now, we are only interested in files that are not seekSV
         if file.method != 'seekSV':
-            df = file.df
             # Filter out rows with quality flags
             df = df[(df['FILTER'] == 'PASS') | (df['FILTER'] == '.')]
             file.df = df
@@ -206,6 +213,10 @@ def filter(files):
             if file.df.empty == False:
                 printdf = file.df[['#CHROM', 'POS']]
                 print(f'File: {file.path} ########## \n {printdf}')
+        else:
+            # Rename columns
+            file.df = df.rename(columns={'@left_chr': '#CHROM', 'left_pos': 'POS'})
+            filtered_files.append(file)
     return filtered_files
 
 
